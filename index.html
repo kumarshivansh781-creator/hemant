@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ProService Finder</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ------------------ GLOBAL STYLES ------------------ */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    /* Use the imported Poppins font */
+    font-family: "Poppins", sans-serif; 
+}
+
+/* Custom Scrollbar for a more polished feel */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.1); }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.4); border-radius: 5px; }
+::-webkit-scrollbar-thumb:hover { background: #34ebba; }
+
+body {
+    background: linear-gradient(135deg, #5ee7df, #b490ca, #ff9a9e);
+    background-size: 400% 400%;
+    animation: bgShift 15s infinite ease-in-out;
+    padding: 30px 15px; /* Better padding for mobile */
+    min-height: 100vh;
+    color: rgb(19, 18, 18);
+    line-height: 1.6;
+}
+
+/* Background animation */
+@keyframes bgShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Floating shapes - Adjusted opacity/blur for a less cluttered look */
+.shape {
+    position: fixed;
+    border-radius: 50%;
+    opacity: 0.15; /* Reduced opacity */
+    filter: blur(80px); /* Increased blur */
+    animation: float 15s infinite ease-in-out alternate;
+    z-index: -1; /* Ensure they are behind content */
+}
+.shape1 { width: 400px; height: 400px; background: #ff6ec7; top: -100px; right: -100px; }
+.shape2 { width: 300px; height: 300px; background: #34ebba; bottom: -80px; left: -80px; animation-delay: 4s; }
+.shape3 { width: 250px; height: 250px; background: #fffa7f; top: 30%; left: 10%; animation-delay: 8s; }
+@keyframes float {
+    0% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(30px) rotate(10deg); } /* More movement */
+    100% { transform: translateY(0px) rotate(0deg); }
+}
+
+/* Header */
+.header { text-align: center; margin-bottom: 50px; }
+.header h1 {
+    font-size: clamp(32px, 5vw, 48px); /* Responsive font size */
+    font-weight: 700;
+    animation: glowText 3s ease-in-out infinite alternate;
+}
+@keyframes glowText {
+    0% { text-shadow: 0 0 5px #fff, 0 0 10px #34ebba, 0 0 20px #ff6ec7; }
+    100% { text-shadow: 0 0 10px #fff, 0 0 20px #34ebba, 0 0 30px #ff6ec7; }
+}
+.header p { font-size: 18px; margin-top: 10px; opacity: 0.8; }
+
+/* Search area */
+.search-area {
+    background: rgba(255, 255, 255, 0.1); /* Lighter background for better contrast */
+    border-radius: 20px; padding: 25px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    margin: 0 auto 50px auto; /* Centered search area */
+    max-width: 900px; /* Max width for search box */
+}
+.input-group {
+    display: flex;
+    gap: 50px;
+}
+input, select {
+    flex-grow: 1; /* Inputs take available space */
+    padding: 18px; /* Slightly larger padding for touch targets */
+    font-size: 16px; border: 1px solid rgba(255,255,255,0.2); /* Subtle border */
+    border-radius: 15px; margin-bottom: 0; /* Remove old margin */
+    background: rgba(255,255,255,0.15); color: rgb(26, 24, 24); outline: none;
+    transition: all 0.3s ease;
+    appearance: none; /* For select consistency */
+}
+input::placeholder { color: rgba(255,255,255,0.7); }
+input:focus, select:focus {
+    /* Better focus state for accessibility and visual polish */
+    border-color: #34ebba; 
+    box-shadow: 0 0 15px rgba(52, 235, 186, 0.7); 
+    transform: scale(1.0); /* Removed the scale for a more professional feel */
+}
+
+/* Service Cards */
+.cards-container { 
+    display: grid; gap: 30px; 
+    /* Responsive grid columns */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.card {
+    background: rgba(255,255,255,0.15);
+    border-radius: 20px; padding: 25px; /* Increased padding */
+    backdrop-filter: blur(15px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    transition: transform 0.4s ease-out, box-shadow 0.4s ease; /* Optimized transition */
+    transform-style: preserve-3d; 
+    animation: popIn 0.8s ease both;
+    perspective: 1000px;
+    position: relative;
+    overflow: hidden; /* Keep content within rounded corners */
+}
+@keyframes popIn { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+/* Slightly more subtle 3D hover effect */
+.card:hover { 
+    transform: rotateY(5deg) rotateX(2deg) translateY(-5px); 
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6); 
+}
+
+.card img {
+    width: calc(100% + 50px); /* Extend image to fill edge */
+    height: 180px; /* Taller image */
+    object-fit: cover;
+    margin: -25px -25px 15px -25px; /* Offset to fill card header */
+    border-top-left-radius: 20px; 
+    border-top-right-radius: 20px; 
+    transition: transform 0.5s ease;
+    clip-path: inset(0 0 0 0); /* Fix for some overflow issues */
+}
+.card:hover img { transform: scale(1.08) translateY(5px); }
+
+.title { font-size: 24px; font-weight: 700; margin-bottom: 8px; color: #fff; }
+.category { 
+    color: #b490ca; /* Use a theme color */ 
+    font-weight: 600;
+    margin-bottom: 10px; 
+    display: inline-block;
+    padding: 2px 8px;
+    border: 1px solid rgba(180, 144, 202, 0.5);
+    border-radius: 5px;
+    font-size: 13px;
+}
+.rating { color: #ffd700; font-weight: 600; margin-bottom: 15px; }
+.description { 
+    color: #f0f0f0; margin-bottom: 15px; font-size: 15px; 
+    min-height: 45px; /* Ensure consistent card height */
+}
+.cost { color: #5ee7df; font-weight: 700; font-size: 18px; margin-top: 10px; }
+.contact { font-size: 14px; color: #fff; opacity: 0.7; margin-top: 10px; }
+
+/* Status Badge - More polished look */
+.badge { 
+    padding: 6px 12px; border-radius: 20px; font-weight: 600; 
+    width: fit-content; display: inline-block; 
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.green { background: #34ebba; color:#000; box-shadow: 0 0 10px rgba(52, 235, 186, 0.5); }
+.red { background: #ff6ec7; color:#fff; box-shadow: 0 0 10px rgba(255, 110, 199, 0.5); }
+
+/* New CTA Button */
+.book-btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    margin-top: 20px;
+    border: none;
+    border-radius: 15px;
+    background: linear-gradient(90deg, #34ebba, #5ee7df);
+    color: #1a1a2e;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    text-align: center;
+    text-transform: uppercase;
+}
+.book-btn:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 20px rgba(52, 235, 186, 0.8);
+}
+.hr-separator {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.2);
+    margin: 15px 0;
+    border: none;
+}
+
+/* ------------------ MEDIA QUERIES ------------------ */
+@media (max-width: 600px) {
+    .input-group {
+        flex-direction: column; /* Stack search and filter on small screens */
+    }
+    input, select {
+        padding: 15px;
+    }
+    .header h1 {
+        font-size: 38px;
+    }
+    body {
+        padding: 15px;
+    }
+}
+@media (min-width: 1200px) {
+    .cards-container {
+        grid-template-columns: repeat(4, 1fr); /* 4 columns on very large screens */
+    }
+}
+</style>
+</head>
+
+<body>
+<div class="shape shape1"></div>
+<div class="shape shape2"></div>
+<div class="shape shape3"></div>
+
+<div class="container">
+
+    <div class="header">
+        <h1>🛠️ ProService Finder</h1>
+        <p>Your portal to certified household professionals, featuring transparent pricing and instant booking.</p>
+    </div>
+
+    <div class="search-area">
+        <div class="input-group">
+            <input id="searchInput" type="text" placeholder="Search by service or trade (e.g., HVAC, leak fix, cleaning)">
+            <select id="categoryFilter">
+                <option value="All">All Categories</option>
+                <option value="Plumbing">Plumbing</option>
+                <option value="Electrical">Electrical</option>
+                <option value="Cleaning">Cleaning</option>
+                <option value="Carpentry">Carpentry</option>
+                <option value="HVAC">HVAC</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="serviceList" class="cards-container fade"></div>
+
+</div>
+
+<script>
+const services = [
+    {
+        id: 1,
+        name: "Supreme Plumbing Fix",
+        category: "Plumbing",
+        img: "https://imgs.search.brave.com/oTO7lwqQ18hQbmB0EIYaee-ISL222TeqSt6SHMsZMj4/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9jZG4u/cHJvZC53ZWJzaXRl/LWZpbGVzLmNvbS82/MzkwZTE0Y2M3MzRh/OTMxZjgzMjczNDMv/NjUxMjRlYTkzMjk0/MzdlYjU1Nzk2YTE5/X2ltYWdlNS5qcGc",
+        available: true,
+        rating: 4.8,
+        description: "Certified master plumber for emergency leaks, complex clogs, and new fixture installation.",
+        cost: "$89 flat service fee"
+    },
+    {
+        id: 2,
+        name: "Pro-Circuit Electrical",
+        category: "Electrical",
+        img: "https://imgs.search.brave.com/Vk5__nR4Ff23DynJ4-VhhyIC3z1hi7knk-Pc0kbSNxw/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9jZG4u/cGl4YWJheS5jb20v/cGhvdG8vMjAxNS8x/Mi8wNy8xMC80OS9l/bGVjdHJpY2lhbi0x/MDgwNTU0XzY0MC5q/cGc",
+        available: false,
+        rating: 4.3,
+        description: "Specializing in panel upgrades, smart home wiring, and troubleshooting faulty circuits.",
+        cost: "Service unavailable"
+    },
+    {
+        id: 3,
+        name: "Sparkle & Shine Cleaners",
+        category: "Cleaning",
+        img: "https://imgs.search.brave.com/pbhMhJfNoZmlx1tTjV92JsutJfxYKbgjS-i2cpfstZ8/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly93d3cu/c2Fzc3ltYW1haGsu/Y29tL3dwLWNvbnRl/bnQvdXBsb2Fkcy8y/MDI0LzAxL2hvdXNl/LWNsZWFuaW5nLXNl/cnZpY2VzLWhvbmct/a29uZy1kZWVwLWNs/ZWFuaW5nLWhvbWU0/LmpwZw",
+        available: true,
+        rating: 4.9,
+        description: "Eco-friendly deep cleaning service. Weekly, bi-weekly, and one-time deep-scrub options.",
+        cost: "$65 per standard hour"
+    },
+    {
+        id: 4,
+        name: "Custom Woodworks",
+        category: "Carpentry",
+        img: "https://imgs.search.brave.com/8pmqjx17Sko1hM2uaA_Xu5fp7ClqhvJOrCglsEtZL9k/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly93d3cu/aGlnaHNwZWVkdHJh/aW5pbmcuY28udWsv/aHViL3dwLWNvbnRl/bnQvdXBsb2Fkcy8y/MDI0LzA3L2NhcnBl/bnRlcjMuanBn",
+        available: true,
+        rating: 4.5,
+        description: "Bespoke shelving, door/window frame repair, and custom trim/molding installation.",
+        cost: "Quote needed (Free consultation)"
+    },
+    {
+        id: 5,
+        name: "AirFlow HVAC Experts",
+        category: "HVAC",
+        img: "https://imgs.search.brave.com/uNBVZof06JE7upvxHF8_k3Az735y4t9UznyUCUR-ToI/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly93d3cu/c2Fzc3ltYW1haGsu/Y29tL3dwLWNvbnRl/bnQvdXBsb2Fkcy8y/MDI0LzAxL2hvdXNl/LWNsZWFuaW5nLXNl/cnZpY2VzLWhvbmct/a29uZy1kZWVwLWNs/ZWFuaW5nLWhvbWUz/NC5qcGc",
+        available: false,
+        rating: 4.6,
+        description: "Full-service HVAC. AC repair, furnace maintenance, and duct cleaning. Licensed and insured.",
+        cost: "Emergency service: $150"
+    },
+    {
+        id: 6,
+        name: "Furniture Assemblers Pro",
+        category: "Carpentry",
+        img: "https://imgs.search.brave.com/siQRRzC9rsZP3lYnw1lAwX12JnIhuOuaKXTqKF2mvuM/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9tZWRp/YS5pc3RvY2twaG90/by5jb20vaWQvMTE0/MjIwNjM0MC9waG90/by9jb3VwbGUtYXNz/ZW1ibGluZy1mdXJu/aXR1cmUtdG9nZXRo/ZXIuanBnP3M9NjEy/eDYxMiZ3PTAmaz0y/MCZjPWdtdm9OX0FU/ejdIdVlKazQwQUlY/clAxQkR5OWllV1NC/Z3RibmNBa1ZySmM9",
+        available: true,
+        rating: 4.7,
+        description: "Fast, reliable assembly of all flat-pack furniture brands. Get your space back quickly!",
+        cost: "$45 - $100 per piece"
+    },
+    {
+        id: 7,
+        name: "Zenith Deep Cleaning",
+        category: "Cleaning",
+        img: "https://imgs.search.brave.com/_uNX8Fq13TJYeyuqIabU5h8oWPhTK2csqI3ugcLmojg/rs:fit:0:180:1:0/g:ce/aHR0cHM6Ly90ZWNo/c3F1YWR0ZWFtLmNv/bS9pbWcvaWNvbjEu/d2VicA",
+        available: true,
+        rating: 4.9,
+        description: "Move-in/out and post-renovation cleaning. We leave no dust behind!",
+        cost: "$250 for 4 hours"
+    },
+];
+
+const searchInput = document.getElementById("searchInput");
+const categoryFilter = document.getElementById("categoryFilter");
+const serviceList = document.getElementById("serviceList");
+
+function renderServices(text = "", category = "All") {
+    serviceList.innerHTML = "";
+    const filtered = services.filter(s => s.name.toLowerCase().includes(text.toLowerCase()) && (category === "All" || s.category === category));
+    
+    // Add a slight delay for the fade animation
+    setTimeout(() => {
+        if (filtered.length === 0) {
+            serviceList.innerHTML = "<p style='color:white;font-size:20px;text-align:center; opacity: 0.8; margin-top: 50px;'>No results found ❌ Please try another search or category.</p>";
+            return;
+        }
+        filtered.forEach(service => {
+            const card = document.createElement("div");
+            card.className = "card fade";
+            card.innerHTML = `
+                <img src="${service.img}" alt="${service.name}">
+                <div class="title">${service.name}</div>
+                <div class="category">${service.category}</div>
+                <div class="rating">⭐ ${service.rating} (${(Math.random() * 200 + 50).toFixed(0)} Reviews)</div>
+                <div class="badge ${service.available ? "green" : "red"}">${service.available ? "Available Now" : "Fully Booked"}</div>
+                <div class="description">${service.description}</div>
+                
+                <hr class="hr-separator">
+
+                <div class="cost">${service.cost}</div>
+                <button class="book-btn" ${!service.available ? "disabled" : ""}>
+                    ${service.available ? "Book Now" : "Waitlist"}
+                </button>
+                <div class="contact">Avg. Response Time: 15 mins</div>
+            `;
+            serviceList.appendChild(card);
+        });
+    }, 50); // Small delay to re-trigger the fade-in effect on filter/search
+}
+
+renderServices();
+searchInput.addEventListener("input", () => renderServices(searchInput.value, categoryFilter.value));
+categoryFilter.addEventListener("change", () => renderServices(searchInput.value, categoryFilter.value));
+</script>
+<footer>
+    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&copy; 2025 ProService Finder.All Rights are reserved.
+</footer>
+</body>
+</html>
